@@ -115,7 +115,7 @@ class EmbeddingIntegralDriver:
             fakemol = gto.fakemol_for_charges(charge_coordinates)
             self.integral0 = df.incore.aux_e2(self.mol, fakemol, intor='int3c2e')
         # shouldnt multipoles also use [idx]?
-        charges = np.array([m[0] for m in multipoles])
+        charges = np.array([m[0:1] for m in multipoles])
         op += np.einsum('ijg,ga->ij', self.integral0 * -1.0, charges)
         # 1 order
         if np.any(multipole_orders >= 1):
