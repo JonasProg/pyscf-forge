@@ -296,6 +296,10 @@ class PolarizableEmbedding(lib.StreamObject):
         from pyscf.embedding import embedding_gradient
         return embedding_gradient.make_grad_object(grad_method)
 
+    def hessian_method(self, hess_method):
+        from pyscf.embedding import embedding_hessian
+        return embedding_hessian.make_hess_object(hess_method)
+
     def _create_pyframe_objects(self):
         # should the creation process get a callback and throw back if sth goes wrong?
         # throw exception if it is not exactly for one qm and one classical subsystem
