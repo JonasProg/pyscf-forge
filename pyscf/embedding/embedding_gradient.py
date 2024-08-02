@@ -78,7 +78,7 @@ class EmbeddingIntegralDriver:
             self.coordinates0 = charge_coordinates
             fakemol = gto.fakemol_for_charges(charge_coordinates)
             self.integral0 = df.incore.aux_e2(self.mol, fakemol, intor='int3c2e_ip1', comp=3)
-        charges = np.array([m[0:1] for m in multipoles])
+        charges = np.array([m[0] for m in multipoles])
         op += np.einsum('cijg,ga->cij', self.integral0 * -1.0, charges)
         # 1 order
         if np.any(multipole_orders >= 1):
@@ -153,7 +153,6 @@ def make_grad_object(grad_method):
     '''
     '''
     assert isinstance(grad_method.base, _Embedding)
-    logger.warn(grad_method, "PE gradients are not optimized for performance.")
     if not isinstance(grad_method.base, scf.hf.SCF):
         raise NotImplementedError("PE gradients only implemented for SCF methods.")
     grad_method_class = grad_method.__class__
@@ -210,8 +209,8 @@ def kernel(embedding_obj, dm, verbose=None):
         integral_driver=integral_driver)
     e_es_el_grad = _grad_from_operator(mol, f_es_grad, dm)
     el_fields = quantum_subsystem.compute_electronic_fields(coordinates=classical_subsystem.coordinates,
-                                                                 density_matrix=dm,
-                                                                 integral_driver=embedding_obj._integral_driver)
+                                                            density_matrix=dm,
+                                                            integral_driver=embedding_obj._integral_driver)
     nuc_fields = quantum_subsystem.compute_nuclear_fields(classical_subsystem.coordinates)
     classical_subsystem.solve_induced_dipoles(external_fields=(el_fields + nuc_fields),
                                               threshold=embedding_obj._threshold,
@@ -239,8 +238,9 @@ def kernel(embedding_obj, dm, verbose=None):
     else:
         e_rep_grad = 0.0
         e_disp_grad = 0.0
-    de += -e_ind_nuc_grad  + e_ind_el_grad - e_es_nuc_grad + e_es_el_grad + e_rep_grad + e_disp_grad
+    de += -e_ind_nuc_grad + e_ind_el_grad + e_es_nuc_grad + e_es_el_grad + e_rep_grad + e_disp_grad
     return de
+
 
 def _grad_from_operator(mol, op, dm):
     natoms = mol.natm

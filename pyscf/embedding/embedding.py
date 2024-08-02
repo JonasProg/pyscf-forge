@@ -114,7 +114,8 @@ class EmbeddingIntegralDriver:
             self.coordinates0 = charge_coordinates
             fakemol = gto.fakemol_for_charges(charge_coordinates)
             self.integral0 = df.incore.aux_e2(self.mol, fakemol, intor='int3c2e')
-        charges = np.array([m[0:1] for m in multipoles])
+        # shouldnt multipoles also use [idx]?
+        charges = np.array([m[0] for m in multipoles])
         op += np.einsum('ijg,ga->ij', self.integral0 * -1.0, charges)
         # 1 order
         if np.any(multipole_orders >= 1):
@@ -172,6 +173,7 @@ class EmbeddingIntegralDriver:
             self.integral1 = df.incore.aux_e2(self.mol, fakemol, intor='int3c2e_ip1')
         f_el_ind = np.einsum('aijg,ga->ij', -1 * self.integral1, induced_dipoles)
         return f_el_ind + f_el_ind.T
+
 
 class PolarizableEmbedding(lib.StreamObject):
     _keys = {'mol', 'comm', 'options', 'classical_subsystem', 'quantum_subsystem', 'e', 'v'}
@@ -307,12 +309,12 @@ class PolarizableEmbedding(lib.StreamObject):
         density_matrix = density_matrix.reshape(-1, nao, nao)
         if self._e_nuc_es is None:
             self._e_nuc_es = electrostatic_interactions.compute_electrostatic_nuclear_energy(
-            quantum_subsystem=self.quantum_subsystem,
-            classical_subsystem=self.classical_subsystem)
+                quantum_subsystem=self.quantum_subsystem,
+                classical_subsystem=self.classical_subsystem)
         if self._f_el_es is None:
             self._f_el_es = electrostatic_interactions.es_fock_matrix_contributions(
-            classical_subsystem=self.classical_subsystem,
-            integral_driver=self._integral_driver)
+                classical_subsystem=self.classical_subsystem,
+                integral_driver=self._integral_driver)
         if self._e_rep is None or self._e_disp is None:
             if 'vdw' in self.options:
                 if not isinstance(self.options['vdw'], dict):

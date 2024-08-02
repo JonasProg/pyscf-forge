@@ -49,5 +49,5 @@ class TestPolarizableEmbedding(unittest.TestCase):
         self.assertAlmostEqual(mf.e_tot, ref_scf_energy, 8)
 
 if __name__ == "__main__":
-    print("Full Tests for pol_embed")
+    print("Full Tests for Embedding")
     unittest.main()
