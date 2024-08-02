@@ -112,4 +112,9 @@ class SCFWithEmbedding(_Embedding):
         grad_method = super().nuc_grad_method()
         return self.with_embedding.nuc_grad_method(grad_method)
 
+    def hessian_method(self):
+        hess_method = super().hessian_method()
+        return self.with_embedding.hessian_method(hess_method)
+
     Gradients = nuc_grad_method
+    Hessian = hessian_method
